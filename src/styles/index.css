@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    background: #090c13;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    background:
+      linear-gradient(180deg, rgba(18, 22, 31, 0.96), rgba(8, 11, 18, 1)),
+      #090c13;
+    color: #f2f5ff;
+    font-family: Inter, ui-sans-serif, system-ui, Segoe UI, sans-serif;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  ::selection {
+    background: rgba(170, 192, 255, 0.32);
+  }
+
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #090c13;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #2b3240;
+    border: 3px solid #090c13;
+    border-radius: 999px;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply border border-white/10 bg-panel/85 shadow-panel backdrop-blur-xl;
+  }
+
+  .dev-card {
+    @apply rounded-lg border border-white/10 bg-panel/90 shadow-panel;
+  }
+
+  .dev-card-soft {
+    @apply rounded-lg border border-white/10 bg-panelSoft/80 shadow-panel;
+  }
+
+  .gradient-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-brand-gradient px-5 py-3 font-semibold text-ink shadow-button transition duration-200 hover:-translate-y-0.5 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-periwinkle/60;
+  }
+
+  .ghost-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-5 py-3 font-semibold text-text transition duration-200 hover:-translate-y-0.5 hover:border-periwinkle/35 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-periwinkle/50;
+  }
+
+  .icon-button {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-lg border border-transparent text-slate-200 transition duration-200 hover:border-white/10 hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-periwinkle/50;
+  }
+
+  .input-shell {
+    @apply w-full rounded-lg border border-white/10 bg-ink px-4 py-3 text-text outline-none transition placeholder:text-dim focus:border-periwinkle/55 focus:ring-2 focus:ring-periwinkle/15;
+  }
+
+  .mono {
+    @apply font-mono;
+  }
+
+  .page-grid {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  .text-gradient {
+    @apply bg-brand-gradient bg-clip-text text-transparent;
+  }
+
+  .section-shell {
+    @apply mx-auto w-full max-w-[1250px] px-4 sm:px-6 lg:px-8;
+  }
+
+  .code-token-blue {
+    color: #63a7ff;
+  }
+
+  .code-token-purple {
+    color: #d7a7ff;
+  }
+
+  .code-token-amber {
+    color: #ffad72;
+  }
+
+  .code-token-muted {
+    color: #697386;
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+    background-size: 500px 100%;
+    @apply animate-shimmer rounded-lg;
+  }
+}

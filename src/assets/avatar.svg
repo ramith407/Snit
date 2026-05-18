@@ -1,0 +1,18 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="160" height="160" rx="80" fill="#090C13"/>
+  <rect x="8" y="8" width="144" height="144" rx="72" fill="url(#halo)" stroke="#2B3240" stroke-width="6"/>
+  <circle cx="80" cy="64" r="30" fill="#D8A676"/>
+  <path d="M45 132C50 106 62 94 80 94C98 94 110 106 115 132H45Z" fill="#141A24"/>
+  <path d="M45 132C51 112 62 102 80 102C98 102 109 112 115 132" stroke="#5A92FF" stroke-width="6" stroke-linecap="round"/>
+  <path d="M48 64C49 38 61 24 82 24C103 24 116 39 115 65C105 48 89 39 66 40C58 45 52 53 48 64Z" fill="#191E2A"/>
+  <path d="M57 65C63 72 70 75 80 75C90 75 97 72 103 65" stroke="#141A24" stroke-width="5" stroke-linecap="round"/>
+  <path d="M67 58H67.5M93 58H93.5" stroke="#141A24" stroke-width="7" stroke-linecap="round"/>
+  <path d="M68 85C75 90 86 90 93 85" stroke="#141A24" stroke-width="5" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="halo" x1="21" y1="19" x2="140" y2="140" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10202C"/>
+      <stop offset="0.42" stop-color="#071015"/>
+      <stop offset="1" stop-color="#241A36"/>
+    </linearGradient>
+  </defs>
+</svg>
