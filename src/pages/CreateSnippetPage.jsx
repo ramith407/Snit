@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ChevronDown, GitBranch, Hash, Plus, Save } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ChevronDown, GitBranch, Hash, Save, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { CodeEditorWrapper } from "../components/CodeEditorWrapper";
 import { useToast } from "../components/Toast";
+import { useSnippets } from "../context/SnippetContext";
 import { pageTransition } from "../animations/transitions";
 
 const starterCode = `// Write or paste your code here...
@@ -26,19 +27,60 @@ export function CreateSnippetPage() {
   const [description, setDescription] = useState("");
   const [code, setCode] = useState(starterCode);
   const [commitMessage, setCommitMessage] = useState("Initial commit");
+  const [tags, setTags] = useState([]);
+  const [tagInput, setTagInput] = useState("");
   const [showValidation, setShowValidation] = useState(false);
   const { pushToast } = useToast();
+  const { createSnippet } = useSnippets();
+  const navigate = useNavigate();
 
   const hasTitle = title.trim().length > 0;
   const hasCode = code.trim().length > 0;
 
-  function handleSave() {
+  function handleTagKeyDown(event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const value = tagInput.trim().toLowerCase();
+      if (value && !tags.includes(value)) {
+        setTags((prev) => [...prev, value]);
+      }
+      setTagInput("");
+    }
+  }
+
+  function removeTag(tagToRemove) {
+    setTags((prev) => prev.filter((t) => t !== tagToRemove));
+  }
+
+  async function handleSave() {
     setShowValidation(true);
     if (!hasTitle || !hasCode) return;
-    pushToast({
-      title: "Snippet saved",
-      message: "Static UI state updated. Backend persistence comes next.",
-    });
+
+    try {
+      const newId = await createSnippet({
+        title,
+        language,
+        description,
+        code,
+        tags,
+        commitMessage,
+      });
+
+      pushToast({
+        title: "Snippet saved",
+        message: "Your new snippet has been created successfully.",
+      });
+
+      if (newId) {
+        navigate(`/snippets/${newId}`);
+      }
+    } catch (error) {
+      pushToast({
+        title: "Save failed",
+        message: error.message || "Could not create the snippet.",
+        type: "info",
+      });
+    }
   }
 
   return (
@@ -108,15 +150,24 @@ export function CreateSnippetPage() {
               <h2 className="font-semibold text-slate-200">Tags</h2>
             </div>
             <div className="flex flex-wrap gap-2">
-              {["auth", "middleware"].map((tag) => (
-                <span key={tag} className="rounded-full bg-white/[0.06] px-3 py-2 mono text-sm">
+              {tags.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                  className="group/tag inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-2 mono text-sm transition hover:bg-danger/15 hover:text-danger"
+                >
                   #{tag}
-                </span>
+                  <X size={14} className="opacity-50 transition group-hover/tag:opacity-100" />
+                </button>
               ))}
-              <button className="inline-flex items-center gap-2 rounded-full border border-dashed border-white/15 px-3 py-2 mono text-sm text-slate-200 transition hover:border-periwinkle/40 hover:text-periwinkle">
-                <Plus size={16} />
-                Add Tag
-              </button>
+              <input
+                value={tagInput}
+                onChange={(event) => setTagInput(event.target.value)}
+                onKeyDown={handleTagKeyDown}
+                className="inline-flex min-w-[120px] flex-1 rounded-full border border-dashed border-white/15 bg-transparent px-3 py-2 mono text-sm text-slate-200 outline-none placeholder:text-muted transition focus:border-periwinkle/40"
+                placeholder="Type & press Enter"
+              />
             </div>
           </div>
         </div>

@@ -1,24 +1,48 @@
 import { useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { Copy, Download, GitCompareArrows, Plus, Save } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { Copy, Download, GitCompareArrows, Plus, Save, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { CodeEditorWrapper } from "../components/CodeEditorWrapper";
 import { LanguagePill, Tag } from "../components/Card";
 import { Modal } from "../components/Modal";
 import { Timeline } from "../components/Timeline";
 import { useToast } from "../components/Toast";
-import { snippets } from "../data/snippets";
+import { useSnippets } from "../context/SnippetContext";
 import { pageTransition } from "../animations/transitions";
 
 export function SnippetDetailsPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { snippets, addVersion, deleteSnippet, loading } = useSnippets();
   const snippet = useMemo(
-    () => snippets.find((item) => item.id === id) ?? snippets[0],
-    [id],
+    () => snippets.find((item) => item.id === id),
+    [id, snippets],
   );
   const [modalOpen, setModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState("Patch token extraction edge cases");
   const { pushToast } = useToast();
+
+  if (loading) {
+    return (
+      <motion.div {...pageTransition} className="dev-card py-16 text-center text-slate-300">
+        <p className="text-lg font-medium">Loading snippet...</p>
+      </motion.div>
+    );
+  }
+
+  if (!snippet) {
+    return (
+      <motion.div {...pageTransition} className="dev-card py-16 text-center text-slate-300">
+        <p className="text-lg font-medium">Snippet not found</p>
+        <p className="mt-2 text-sm text-muted">Open another snippet or create a new one.</p>
+        <Link to="/snippets" className="gradient-button mt-6 inline-flex">
+          Back to Snippets
+        </Link>
+      </motion.div>
+    );
+  }
 
   function handleCopy() {
     navigator.clipboard?.writeText(snippet.code);
@@ -31,7 +55,26 @@ export function SnippetDetailsPage() {
 
   function handleVersionCreate() {
     setModalOpen(false);
-    pushToast({ title: "Version drafted", message: message || "New static version created." });
+    addVersion(snippet.id, message);
+    pushToast({ title: "Version drafted", message: message || "New version created." });
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      await deleteSnippet(snippet.id);
+      pushToast({ title: "Snippet deleted", message: `${snippet.title} was removed.` });
+      navigate("/snippets");
+    } catch (error) {
+      pushToast({
+        title: "Delete failed",
+        message: error.message || "Could not delete this snippet.",
+        type: "info",
+      });
+    } finally {
+      setDeleting(false);
+      setDeleteModalOpen(false);
+    }
   }
 
   return (
@@ -65,6 +108,13 @@ export function SnippetDetailsPage() {
             <GitCompareArrows size={18} />
             Compare
           </Link>
+          <button
+            className="ghost-button border-danger/30 text-rose-200 hover:border-danger/50 hover:text-danger"
+            onClick={() => setDeleteModalOpen(true)}
+          >
+            <Trash2 size={18} />
+            Delete
+          </button>
           <button className="gradient-button" onClick={() => setModalOpen(true)}>
             <Plus size={18} />
             New Version
@@ -74,7 +124,7 @@ export function SnippetDetailsPage() {
 
       <section className="grid gap-7 xl:grid-cols-[380px_minmax(0,1fr)]">
         <aside className="space-y-5">
-          <Timeline versions={snippet.versions ?? snippets[0].versions} />
+          <Timeline versions={snippet.versions ?? []} />
           <div className="dev-card grid grid-cols-2 gap-4 p-5">
             <div>
               <p className="text-sm font-semibold uppercase text-muted">Views</p>
@@ -112,6 +162,26 @@ export function SnippetDetailsPage() {
           <button className="gradient-button" onClick={handleVersionCreate}>
             <Save size={18} />
             Save Version
+          </button>
+        </div>
+      </Modal>
+
+      <Modal open={deleteModalOpen} title="Delete Snippet" onClose={() => setDeleteModalOpen(false)}>
+        <p className="leading-7 text-slate-300">
+          This will permanently delete <strong className="text-text">{snippet.title}</strong>, including
+          its tags and version history.
+        </p>
+        <div className="mt-5 flex justify-end gap-3">
+          <button className="ghost-button" onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
+            Cancel
+          </button>
+          <button
+            className="ghost-button border-danger/30 text-rose-200 hover:border-danger/50 hover:text-danger"
+            onClick={handleDelete}
+            disabled={deleting}
+          >
+            <Trash2 size={18} />
+            {deleting ? "Deleting..." : "Delete"}
           </button>
         </div>
       </Modal>

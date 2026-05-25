@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Braces,
@@ -9,13 +9,14 @@ import {
   SquareTerminal,
 } from "lucide-react";
 import {
-  currentUser,
   favoriteTags,
   languageDistribution,
   recentProfileEdits,
 } from "../data/snippets";
 import { useToast } from "../components/Toast";
+import { useAuth } from "../context/AuthContext";
 import { pageTransition } from "../animations/transitions";
+import avatarUrl from "../assets/avatar.svg";
 
 const iconMap = {
   Braces,
@@ -46,25 +47,28 @@ function ImpactCard() {
 }
 
 function ProfileHero() {
+  const { user } = useAuth();
+  if (!user) return null;
+
   return (
     <section className="dev-card bg-soft-gradient p-8">
       <div className="flex flex-col gap-8 md:flex-row md:items-center">
         <img
-          src={currentUser.avatarUrl}
-          alt={currentUser.name}
+          src={user.avatarUrl || avatarUrl}
+          alt={user.name}
           className="h-28 w-28 rounded-full border-4 border-borderSoft bg-ink object-cover shadow-glow"
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-4xl font-extrabold text-text md:text-5xl">
-              {currentUser.name}
+              {user.name}
             </h1>
             <span className="rounded-full bg-periwinkle/15 px-3 py-1 mono text-sm font-semibold text-periwinkle">
-              {currentUser.plan}
+              {user.plan}
             </span>
           </div>
-          <p className="mt-2 mono text-periwinkle">{currentUser.handle}</p>
-          <p className="mt-6 max-w-2xl text-xl leading-8 text-slate-300">{currentUser.bio}</p>
+          <p className="mt-2 mono text-periwinkle">{user.handle}</p>
+          <p className="mt-6 max-w-2xl text-xl leading-8 text-slate-300">{user.bio || "No bio added yet."}</p>
           <div className="mt-7 flex flex-wrap gap-3">
             <button className="ghost-button py-2">
               <LinkIcon size={18} />
@@ -155,9 +159,27 @@ function TagsCard() {
 }
 
 function AccountProfile() {
-  const [name, setName] = useState(currentUser.name);
-  const [bio, setBio] = useState("Full-stack engineer building tools for high-performance workflows.");
+  const { user, updateUser } = useAuth();
+  const [name, setName] = useState("");
+  const [bio, setBio] = useState("");
   const { pushToast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name || "");
+      setBio(user.bio || "");
+    }
+  }, [user]);
+
+  function handleSave() {
+    updateUser({ name, bio });
+    pushToast({
+      title: "Profile saved",
+      message: "Your profile details have been successfully updated.",
+    });
+  }
+
+  if (!user) return null;
 
   return (
     <section className="dev-card p-7">
@@ -176,12 +198,7 @@ function AccountProfile() {
       </label>
       <button
         className="gradient-button mt-6 w-full"
-        onClick={() =>
-          pushToast({
-            title: "Profile saved",
-            message: "Static frontend profile state updated.",
-          })
-        }
+        onClick={handleSave}
       >
         <Save size={18} />
         Save Changes

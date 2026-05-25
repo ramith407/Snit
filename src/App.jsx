@@ -9,6 +9,8 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { LandingPage } from "./pages/LandingPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { SnippetDetailsPage } from "./pages/SnippetDetailsPage";
+import { SnippetsPage } from "./pages/SnippetsPage";
+import { FavoritesPage } from "./pages/FavoritesPage";
 
 function ScrollToTop() {
   const location = useLocation();
@@ -35,6 +37,8 @@ export function App() {
 
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/snippets" element={<SnippetsPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/snippets/new" element={<CreateSnippetPage />} />
             <Route path="/snippets/:id" element={<SnippetDetailsPage />} />
             <Route path="/snippets/:id/compare" element={<CompareVersionsPage />} />
@@ -47,3 +51,4 @@ export function App() {
     </>
   );
 }
+

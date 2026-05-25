@@ -1,8 +1,15 @@
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { Sidebar } from "../components/Sidebar";
 import { Topbar } from "../components/Topbar";
+import { useAuth } from "../context/AuthContext";
 
 export function AppLayout() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-void text-text">
       <Sidebar />
@@ -17,3 +24,4 @@ export function AppLayout() {
     </div>
   );
 }
+

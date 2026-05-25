@@ -1,21 +1,24 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import { ArrowRight, Chrome, Github, LockKeyhole, Mail, SquareTerminal } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "../components/Toast";
+import { useAuth } from "../context/AuthContext";
 
 function validateEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 export function AuthPage() {
+  const { user, login, signup } = useAuth();
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({
-    email: "dev@snit.io",
-    password: "password",
+    email: "",
+    password: "",
     name: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [serverError, setServerError] = useState("");
   const { pushToast } = useToast();
   const navigate = useNavigate();
 
@@ -29,20 +32,38 @@ export function AuthPage() {
     return nextErrors;
   }, [form, mode]);
 
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   function updateField(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     setSubmitted(true);
+    setServerError("");
     if (Object.keys(errors).length > 0) return;
 
+    const result =
+      mode === "login"
+        ? await login(form.email, form.password)
+        : await signup(form.name, form.email, form.password);
+
+    if (result.success) {
+      navigate("/dashboard");
+    } else {
+      setServerError(result.error || "Something went wrong. Please try again.");
+    }
+  }
+
+  function handleOAuth() {
     pushToast({
-      title: mode === "login" ? "Welcome back" : "Workspace created",
-      message: "Snit is running with static frontend data for now.",
+      title: "Coming soon",
+      message: "OAuth integration is not yet available.",
+      type: "info",
     });
-    navigate("/dashboard");
   }
 
   return (
@@ -91,6 +112,7 @@ export function AuthPage() {
               onClick={() => {
                 setMode(tab);
                 setSubmitted(false);
+                setServerError("");
               }}
             >
               {tab === "login" ? "Login" : "Sign Up"}
@@ -159,6 +181,12 @@ export function AuthPage() {
             )}
           </label>
 
+          {serverError && (
+            <p className="rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+              {serverError}
+            </p>
+          )}
+
           <button className="gradient-button h-14 w-full text-base" type="submit">
             Authenticate
             <ArrowRight size={21} />
@@ -171,11 +199,11 @@ export function AuthPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <button className="ghost-button h-11 px-3 py-0" type="button">
+            <button className="ghost-button h-11 px-3 py-0" type="button" onClick={handleOAuth}>
               <Github size={19} />
               GitHub
             </button>
-            <button className="ghost-button h-11 px-3 py-0" type="button">
+            <button className="ghost-button h-11 px-3 py-0" type="button" onClick={handleOAuth}>
               <Chrome size={19} className="text-amber" />
               Google
             </button>

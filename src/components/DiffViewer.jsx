@@ -1,3 +1,5 @@
+import { computeDiff } from "../context/SnippetContext";
+
 function lineClass(type) {
   if (type === "add") return "bg-blue/15 text-slate-100";
   if (type === "remove") return "bg-danger/15 text-slate-100";
@@ -42,20 +44,34 @@ function DiffPane({ title, fileName, lines, tone }) {
   );
 }
 
-export function DiffViewer({ data }) {
+export function DiffViewer({
+  data,
+  oldCode,
+  newCode,
+  baseLabel = "Base",
+  compareLabel = "Compare",
+  fileName = "file",
+}) {
+  const diffData =
+    data || (oldCode !== undefined && newCode !== undefined ? computeDiff(oldCode, newCode) : null);
+
+  if (!diffData) return null;
+
+  const displayFileName = diffData.fileName || fileName;
+
   return (
     <div className="overflow-hidden rounded-lg border border-white/10 shadow-panel">
       <div className="grid lg:grid-cols-2">
         <DiffPane
-          title="Base: v1.2.0"
-          fileName={data.fileName}
-          lines={data.left}
+          title={data ? "Base: v1.2.0" : baseLabel}
+          fileName={displayFileName}
+          lines={diffData.left}
           tone="remove"
         />
         <DiffPane
-          title="Compare: v1.3.0-rc1"
-          fileName={data.fileName}
-          lines={data.right}
+          title={data ? "Compare: v1.3.0-rc1" : compareLabel}
+          fileName={displayFileName}
+          lines={diffData.right}
           tone="add"
         />
       </div>

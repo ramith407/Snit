@@ -1,10 +1,8 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Copy, FileCode2 } from "lucide-react";
-import { DashboardSkeleton } from "../components/Skeleton";
 import { StatCard } from "../components/Card";
-import { useFakeLoading } from "../hooks/useFakeLoading";
-import { snippets, stats } from "../data/snippets";
+import { useSnippets, formatTimeAgo } from "../context/SnippetContext";
 import { fadeUp, pageTransition, staggerContainer } from "../animations/transitions";
 
 const languageClasses = {
@@ -36,7 +34,7 @@ function RecentSnippetRow({ snippet }) {
       >
         {snippet.language}
       </span>
-      <span className="hidden w-24 text-right text-sm text-muted sm:block">{snippet.updatedAt}</span>
+      <span className="hidden w-24 text-right text-sm text-muted sm:block">{formatTimeAgo(snippet.updatedAt)}</span>
     </Link>
   );
 }
@@ -59,13 +57,37 @@ function FavoriteSnippetCard({ snippet }) {
 }
 
 export function DashboardPage() {
-  const loading = useFakeLoading(450);
-  const recent = snippets.slice(1, 4);
-  const favorites = snippets.filter((snippet) => snippet.favorite);
+  const { snippets, stats } = useSnippets();
 
-  if (loading) {
-    return <DashboardSkeleton />;
-  }
+  const statCards = [
+    {
+      label: "Total Snippets",
+      value: stats.totalSnippets.toLocaleString(),
+      detail: `${snippets.length} in your library`,
+      tone: "blue",
+      icon: "Braces",
+    },
+    {
+      label: "Total Versions",
+      value: stats.totalVersions.toLocaleString(),
+      detail: "Across all snippets",
+      tone: "purple",
+      icon: "History",
+    },
+    {
+      label: "Most Used Language",
+      value: stats.mostUsedLanguage,
+      detail: `${stats.mostUsedPercent}% of total repository`,
+      tone: "amber",
+      icon: "Code2",
+    },
+  ];
+
+  const recent = [...snippets]
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+    .slice(0, 5);
+
+  const favorites = snippets.filter((s) => s.favorite);
 
   return (
     <motion.div {...pageTransition} className="space-y-12">
@@ -75,7 +97,7 @@ export function DashboardPage() {
         variants={staggerContainer}
         className="grid gap-6 md:grid-cols-3"
       >
-        {stats.map((stat) => (
+        {statCards.map((stat) => (
           <motion.div key={stat.label} variants={fadeUp}>
             <StatCard stat={stat} />
           </motion.div>
@@ -86,7 +108,7 @@ export function DashboardPage() {
         <div>
           <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
             <h2 className="text-3xl font-extrabold text-text">Recent Snippets</h2>
-            <Link to="/snippets/jwt-auth-middleware" className="font-semibold text-periwinkle">
+            <Link to="/snippets" className="font-semibold text-periwinkle">
               View All
             </Link>
           </div>
@@ -102,11 +124,17 @@ export function DashboardPage() {
             <FileCode2 className="text-periwinkle" size={27} />
             <h2 className="text-3xl font-extrabold text-text">Favorite Snippets</h2>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            {favorites.map((snippet) => (
-              <FavoriteSnippetCard key={snippet.id} snippet={snippet} />
-            ))}
-          </div>
+          {favorites.length > 0 ? (
+            <div className="grid gap-5 sm:grid-cols-2">
+              {favorites.map((snippet) => (
+                <FavoriteSnippetCard key={snippet.id} snippet={snippet} />
+              ))}
+            </div>
+          ) : (
+            <p className="py-8 text-center text-sm text-muted">
+              No favorite snippets yet. Star a snippet to see it here.
+            </p>
+          )}
         </div>
       </section>
     </motion.div>

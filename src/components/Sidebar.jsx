@@ -4,10 +4,11 @@ import { Logo } from "./Logo";
 
 const navItems = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
-  { label: "Snippets", to: "/snippets/jwt-auth-middleware", icon: Code2 },
-  { label: "Favorites", to: "/dashboard#favorites", icon: Star },
+  { label: "Snippets", to: "/snippets", icon: Code2 },
+  { label: "Favorites", to: "/favorites", icon: Star },
   { label: "Settings", to: "/profile", icon: Settings },
 ];
+
 
 function navClass({ isActive }) {
   return [
